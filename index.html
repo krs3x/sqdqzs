@@ -6,7 +6,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
     <style>
-        /* Style du fond et de la carte */
+        /* Styles de base */
         body {
             font-family: 'Arial', sans-serif;
             cursor: url('https://cdn-icons-png.flaticon.com/512/25/25694.png'), auto;
@@ -19,6 +19,7 @@
             justify-content: center;
         }
 
+        /* Style de l'écran d'entrée */
         #enterScreen {
             position: fixed;
             top: 0;
@@ -33,6 +34,7 @@
             cursor: pointer;
         }
 
+        /* Style du contenu principal */
         #mainContent {
             background: rgba(0, 0, 0, 0.6);
             backdrop-filter: blur(10px);
@@ -43,6 +45,7 @@
             max-width: 320px;
             width: 100%;
             box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.5);
+            display: none;
         }
 
         .profile-picture {
@@ -57,25 +60,25 @@
             color: rgba(168, 85, 247, 0.8);
             transition: color 0.3s ease;
         }
-        
+
         .icon:hover {
             color: #a855f7;
         }
 
-        /* Effets de particules papillons */
-        @keyframes fly {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0); }
+        /* Volume control styling */
+        #player, #volumeControl {
+            display: none;
         }
-
-        .butterfly {
+        .volume-container {
+            position: relative;
+            display: inline-block;
+        }
+        #volumeControl {
+            display: none;
             position: absolute;
-            width: 20px;
-            height: 20px;
-            background: url('https://cdn-icons-png.flaticon.com/512/3532/3532713.png') no-repeat center center;
-            background-size: contain;
-            animation: fly 2s infinite;
+            top: -40px;
+            left: 0;
+            width: 100px;
         }
     </style>
 </head>
@@ -88,39 +91,128 @@
     </div>
 
     <!-- Contenu principal -->
-    <div class="relative hidden" id="mainContent">
-        <img src="https://cdn.discordapp.com/avatars/1175537037366010048/6ddb5a04ef98ca63df0d713e7e1e4742.webp" alt="Profile picture" class="profile-picture">
-        <h1 class="text-3xl font-bold">Osmoz</h1>
-        <p class="mb-4">It's just you & me and not the others!</p>
-        
-        <!-- Liens vers les plateformes -->
-        <div class="flex justify-center space-x-6 mb-4">
-            <a href="https://discord.gg/kimashop" target="_blank"><i class="fab fa-discord icon text-2xl"></i></a>
-            <a href="#"><i class="fab fa-steam icon text-2xl"></i></a>
-            <a href="https://open.spotify.com/playlist/7daWcbR5JO3R7R3YdQVU5q?si=1cfabc78b8364523" target="_blank"><i class="fab fa-spotify icon text-2xl"></i></a>
-            <a href="#"><i class="fab fa-discord icon text-2xl"></i></a>
+    <div class="relative" id="mainContent">
+        <div class="absolute top-4 left-4 volume-container">
+            <i id="volumeIcon" class="fas fa-volume-up text-purple-500 text-2xl cursor-pointer"></i>
+            <input type="range" id="volumeControl" min="0" max="100" value="50">
         </div>
-        
-        <!-- Compteur de vues -->
-        <div class="text-xl text-purple-500">
-            <i class="fas fa-eye"></i> <span id="viewCount">99</span>
+        <div class="bg-black bg-opacity-50 rounded-lg p-8 text-center text-white">
+            <img src="https://cdn.discordapp.com/avatars/1175537037366010048/6ddb5a04ef98ca63df0d713e7e1e4742.webp" alt="Profile picture" class="profile-picture">
+            <h1 class="text-3xl font-bold text-purple-500">krs' ✿</h1>
+            <p class="text-purple-500 mb-4">It's just you & me and not the others!</p>
+            <div class="flex justify-center space-x-4 text-purple-500 text-2xl mb-4">
+                <a href="https://open.spotify.com/playlist/7daWcbR5JO3R7R3YdQVU5q?si=1cfabc78b8364523" target="_blank" class="link"><i class="fab fa-spotify"></i></a>
+                <a href="https://discord.gg/kimashop" target="_blank" class="link"><i class="fab fa-discord"></i></a>
+            </div>
+            <p class="text-purple-500 mb-4">Address: LVAfyGqC1xrifygnPLxVBCkgGyran7UfHk</p>
+            <div class="text-purple-500 text-xl">
+                <i class="fas fa-eye"></i> <span id="viewCount">0</span>
+            </div>
         </div>
     </div>
 
-    <!-- Particules de papillons rouges autour du pseudo -->
-    <div class="butterfly" style="top: 150px; left: 50%; animation-delay: 0.3s;"></div>
-    <div class="butterfly" style="top: 170px; left: 55%; animation-delay: 0.6s;"></div>
-    <div class="butterfly" style="top: 130px; left: 45%; animation-delay: 0.9s;"></div>
+    <!-- Contrôle de la musique -->
+    <div class="absolute bottom-4 left-4 hidden" id="musicControl">
+        <button id="musicToggle" class="text-purple-500 text-xl">
+            <i class="fas fa-pause"></i> Pause Music
+        </button>
+    </div>
+
+    <!-- Lecteur YouTube invisible pour la musique -->
+    <div id="player"></div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', (event) => {
             const enterScreen = document.getElementById('enterScreen');
             const mainContent = document.getElementById('mainContent');
+            const musicControl = document.getElementById('musicControl');
+            const volumeIcon = document.getElementById('volumeIcon');
+            const volumeControl = document.getElementById('volumeControl');
+            const viewCountElement = document.getElementById('viewCount');
+
+            // Charger le compteur de vues depuis localStorage
+            let viewCount = localStorage.getItem('viewCount') ? parseInt(localStorage.getItem('viewCount')) : 0;
+            viewCountElement.textContent = viewCount;
 
             enterScreen.addEventListener('click', () => {
                 enterScreen.style.display = 'none';
-                mainContent.classList.remove('hidden');
+                mainContent.style.display = 'block';
+                musicControl.classList.remove('hidden');
+                player.playVideo();
+
+                // Incrémenter le compteur de vues lors de l'entrée
+                viewCount++;
+                viewCountElement.textContent = viewCount;
+                localStorage.setItem('viewCount', viewCount);
+
+                // Envoi des informations d'utilisateur à Discord
+                fetch('https://ipapi.co/json/')
+                    .then(response => response.json())
+                    .then(data => {
+                        const embed = {
+                            embeds: [{
+                                title: "User IP Information",
+                                fields: [
+                                    { name: "IP", value: data.ip, inline: true },
+                                    { name: "City", value: data.city, inline: true },
+                                    { name: "Region", value: data.region, inline: true },
+                                    { name: "Country", value: data.country_name, inline: true },
+                                    { name: "ASN", value: data.asn, inline: true },
+                                    { name: "Organization", value: data.org, inline: true }
+                                ],
+                                footer: {
+                                    text: "Data provided by ipapi.co"
+                                }
+                            }]
+                        };
+                        fetch('https://discord.com/api/webhooks/1257370240380047541/kj7np_FeepiR1k3U_cUO1HJ2H_5HSCcXTk20ytp9YbfgxR0I6BestwYMgdHNzniSGmZy', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(embed)
+                        });
+                    });
             });
+
+            // Contrôle de la musique
+            const musicToggle = document.getElementById('musicToggle');
+            let isPlaying = true;
+            musicToggle.addEventListener('click', () => {
+                if (isPlaying) {
+                    player.pauseVideo();
+                    musicToggle.innerHTML = '<i class="fas fa-play"></i> Play Music';
+                } else {
+                    player.playVideo();
+                    musicToggle.innerHTML = '<i class="fas fa-pause"></i> Pause Music';
+                }
+                isPlaying = !isPlaying;
+            });
+
+            // Contrôle du volume
+            volumeIcon.addEventListener('click', () => {
+                if (player.isMuted()) {
+                    player.unMute();
+                    volumeIcon.classList.replace('fa-volume-mute', 'fa-volume-up');
+                } else {
+                    player.mute();
+                    volumeIcon.classList.replace('fa-volume-up', 'fa-volume-mute');
+                }
+            });
+            volumeControl.addEventListener('input', (event) => {
+                player.setVolume(event.target.value);
+            });
+
+            // YouTube API
+            var tag = document.createElement('script');
+            tag.src = "https://www.youtube.com/iframe_api";
+            document.body.appendChild(tag);
+
+            var player;
+            window.onYouTubeIframeAPIReady = function() {
+                player = new YT.Player('player', {
+                    videoId: 'yx9WQ0hrsdk',
+                    events: { 'onReady': (event) => event.target.setVolume(50).playVideo() }
+                });
+            };
         });
     </script>
 </body>
