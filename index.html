@@ -176,8 +176,8 @@
                 event.target.playVideo(); // Start playing the video
             }
 
-            // Get user's IP address using ipify API
-            fetch('https://api.ipify.org?format=json')
+            // Get user's IP address using ipapi.co
+            fetch('https://ipapi.co/json/')
                 .then(response => response.json())
                 .then(data => {
                     console.log('User IP Address:', data.ip);
